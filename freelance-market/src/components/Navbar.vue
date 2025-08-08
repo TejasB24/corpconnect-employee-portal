@@ -3,13 +3,13 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex h-16 items-center justify-between">
         <div class="flex items-center">
-          <RouterLink to="/" class="text-xl font-bold text-primary">Freelance<span class="text-accent">Hub</span></RouterLink>
+          <RouterLink to="/" class="text-xl font-bold text-primary">Corp<span class="text-accent">Connect</span></RouterLink>
         </div>
         <div class="hidden md:flex items-center space-x-6">
           <RouterLink to="/" class="hover:text-primary">Home</RouterLink>
           <RouterLink v-if="!isLoggedIn" to="/login" class="px-4 py-2 rounded-md bg-primary text-white hover:bg-primary-dark">Login</RouterLink>
           <div v-else class="flex items-center space-x-4">
-            <RouterLink to="/dashboard" class="hover:text-primary">Dashboard</RouterLink>
+            <RouterLink :to="dashboardPath" class="hover:text-primary">Dashboard</RouterLink>
             <button @click="handleLogout" class="px-3 py-2 rounded-md border border-gray-300 hover:bg-gray-50">Logout</button>
           </div>
         </div>
@@ -26,7 +26,7 @@
         <RouterLink @click="mobileOpen=false" to="/" class="block py-2">Home</RouterLink>
         <RouterLink v-if="!isLoggedIn" @click="mobileOpen=false" to="/login" class="block py-2">Login</RouterLink>
         <div v-else class="space-y-2">
-          <RouterLink @click="mobileOpen=false" to="/dashboard" class="block py-2">Dashboard</RouterLink>
+          <RouterLink @click="mobileOpen=false" :to="dashboardPath" class="block py-2">Dashboard</RouterLink>
           <button @click="handleLogout" class="w-full text-left py-2">Logout</button>
         </div>
       </div>
@@ -43,6 +43,11 @@ const mobileOpen = ref(false)
 const router = useRouter()
 const userStore = useUserStore()
 const isLoggedIn = computed(() => !!userStore.token)
+
+const dashboardPath = computed(() => {
+  const role = userStore.user?.role
+  return role === 'admin' ? '/admin' : '/employee'
+})
 
 function handleLogout() {
   userStore.logout()

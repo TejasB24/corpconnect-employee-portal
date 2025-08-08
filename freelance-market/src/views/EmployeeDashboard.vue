@@ -2,10 +2,10 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid lg:grid-cols-[260px_1fr] gap-6">
     <!-- Sidebar -->
     <aside class="bg-white border border-gray-200 rounded-xl p-5 h-max">
-      <h2 class="text-lg font-semibold mb-4">Menu</h2>
+      <h2 class="text-lg font-semibold mb-4">Employee Menu</h2>
       <nav class="space-y-2">
         <a href="#profile" class="block px-3 py-2 rounded-md hover:bg-gray-50">Profile</a>
-        <a href="#projects" class="block px-3 py-2 rounded-md hover:bg-gray-50">Active Projects</a>
+        <a href="#projects" class="block px-3 py-2 rounded-md hover:bg-gray-50">My Projects</a>
         <a href="#messages" class="block px-3 py-2 rounded-md hover:bg-gray-50">Messages</a>
       </nav>
     </aside>
@@ -24,6 +24,7 @@
           <div>
             <div class="font-medium">{{ user?.name || '—' }}</div>
             <div class="text-sm text-gray-600">{{ user?.email || '—' }}</div>
+            <div class="text-xs text-gray-500">Role: {{ user?.role || '—' }}</div>
           </div>
         </div>
       </div>
@@ -31,7 +32,7 @@
       <!-- Projects -->
       <div id="projects" class="bg-white border border-gray-200 rounded-xl p-6">
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-semibold">Active projects</h2>
+          <h2 class="text-lg font-semibold">My active projects</h2>
           <div v-if="loadingProjects" class="text-sm text-gray-500">Loading...</div>
         </div>
         <div v-if="projectsError" class="mt-2 text-sm text-red-600">{{ projectsError }}</div>

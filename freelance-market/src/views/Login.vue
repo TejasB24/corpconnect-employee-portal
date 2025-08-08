@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <h1 class="text-2xl font-bold mb-6">Login</h1>
+    <h1 class="text-2xl font-bold mb-6">Sign in to CorpConnect</h1>
 
     <form @submit.prevent="onSubmit" class="space-y-4 bg-white border border-gray-200 rounded-xl p-6">
       <div>
@@ -41,16 +41,18 @@ const loading = computed(() => userStore.loading)
 const error = computed(() => userStore.error)
 
 onMounted(() => {
-  // If already logged in, go to dashboard
   if (userStore.token) {
-    router.replace('/dashboard')
+    const role = userStore.user?.role
+    router.replace(role === 'admin' ? '/admin' : '/employee')
   }
 })
 
 async function onSubmit() {
   const ok = await userStore.login(email.value, password.value)
   if (ok) {
-    const redirect = route.query.redirect || '/dashboard'
+    const role = userStore.user?.role
+    const fallback = role === 'admin' ? '/admin' : '/employee'
+    const redirect = route.query.redirect || fallback
     router.replace(redirect)
   }
 }

@@ -50,12 +50,17 @@ export const useUserStore = defineStore('user', {
         const { data } = await axios.get(url, {
           headers: { Authorization: `Bearer ${this.token}` },
         })
-        this.user = data
+        // Ensure role exists; default to 'employee' if backend does not provide
+        const role = data?.role || data?.user?.role || 'employee'
+        this.user = { ...data, role }
       } catch (err) {
         this.error = err?.response?.data?.message || err.message || 'Failed to load profile'
       } finally {
         this.loading = false
       }
+    },
+    hasRole(role) {
+      return this.user?.role === role
     },
   },
 })
