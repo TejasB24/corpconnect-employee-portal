@@ -1,88 +1,97 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
-      <!-- Title -->
-      <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">CorpConnect Portal Login</h1>
+  <div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h1 class="text-2xl font-bold mb-6">Sign in to CorpConnect</h1>
 
-      <!-- Role Selector -->
-      <div class="mb-4">
-        <label class="block text-gray-700 mb-1">Login as</label>
-        <select v-model="role" class="w-full border rounded-lg p-2 focus:ring focus:ring-blue-300">
-          <option value="employee">Employee</option>
-          <option value="admin">Admin</option>
-        </select>
-      </div>
-
-      <!-- Email -->
-      <div class="mb-4">
-        <label class="block text-gray-700 mb-1">Email</label>
+    <form
+      @submit.prevent="onSubmit"
+      class="space-y-4 bg-white border border-gray-200 rounded-xl p-6"
+    >
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
         <input
-          type="email"
           v-model="email"
-          placeholder="Enter your email"
-          class="w-full border rounded-lg p-2 focus:ring focus:ring-blue-300"
+          id="email"
+          type="email"
+          required
+          autocomplete="email"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
         />
       </div>
-
-      <!-- Password -->
-      <div class="mb-4">
-        <label class="block text-gray-700 mb-1">Password</label>
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
         <input
-          type="password"
           v-model="password"
-          placeholder="Enter your password"
-          class="w-full border rounded-lg p-2 focus:ring focus:ring-blue-300"
+          id="password"
+          type="password"
+          required
+          autocomplete="current-password"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
         />
       </div>
 
-      <!-- Forgot Password -->
-      <div class="text-right mb-4">
-        <router-link to="/forgot-password" class="text-sm text-blue-600 hover:underline">
-          Forgot Password?
-        </router-link>
-      </div>
+      <div v-if="error" class="text-sm text-red-600">{{ error }}</div>
 
-      <!-- Login Button -->
       <button
-        @click="handleLogin"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition"
+        type="submit"
+        :disabled="loading"
+        class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md bg-primary text-white hover:bg-primary-dark disabled:opacity-60"
       >
-        Login
+        <svg
+          v-if="loading"
+          class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+          ></path>
+        </svg>
+        <span>{{ loading ? 'Signing in...' : 'Sign in' }}</span>
       </button>
-
-      <!-- Sign Up -->
-      <p class="mt-4 text-center text-sm text-gray-600">
-        Don't have an account?
-        <router-link to="/signup" class="text-blue-600 hover:underline"> Sign Up </router-link>
-      </p>
-    </div>
+    </form>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Login',
-  data() {
-    return {
-      role: 'employee',
-      email: '',
-      password: '',
-    }
-  },
-  methods: {
-    handleLogin() {
-      if (!this.email || !this.password) {
-        alert('Please enter both email and password')
-        return
-      }
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useUserStore } from '../stores/userStore'
 
-      // For now just redirect based on role
-      if (this.role === 'admin') {
-        this.$router.push('/dashboard-admin')
-      } else {
-        this.$router.push('/dashboard-employee')
-      }
-    },
-  },
+const email = ref('')
+const password = ref('')
+
+const route = useRoute()
+const router = useRouter()
+const userStore = useUserStore()
+
+const loading = computed(() => userStore.loading)
+const error = computed(() => userStore.error)
+
+onMounted(() => {
+  if (userStore.token) {
+    const role = userStore.user?.role
+    router.replace(role === 'admin' ? '/admin' : '/employee')
+  }
+})
+
+async function onSubmit() {
+  const ok = await userStore.login(email.value, password.value)
+  if (ok) {
+    const role = userStore.user?.role
+    const fallback = role === 'admin' ? '/admin' : '/employee'
+    const redirect = route.query.redirect || fallback
+    router.replace(redirect)
+  }
 }
 </script>
