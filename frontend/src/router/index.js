@@ -1,57 +1,79 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import Home from '../views/Home.vue'
+import Login from '../views/Login.vue'
+import Signup from '../views/Signup.vue'
+import ForgotPassword from '../views/ForgotPassword.vue'
+import EmployeeDashboard from '../views/EmployeeDashboard.vue'
+import AdminDashboard from '../views/AdminDashboard.vue'
+import NotFound from '../views/NotFound.vue'
 import { useUserStore } from '../stores/userStore'
 
-import GuestPage from '../views/GuestPage.vue'
-import Login from '../views/Login.vue'
-import DashboardEmployee from '../views/DashboardEmployee.vue'
-import DashboardAdmin from '../views/DashboardAdmin.vue'
-import NotFound from '../views/NotFound.vue'
-
 const routes = [
-  { path: '/', name: 'Guest', component: GuestPage },
+  { path: '/', name: 'Home', component: Home },
   { path: '/login', name: 'Login', component: Login },
+  { path: '/signup', name: 'Signup', component: Signup },
+  { path: '/forgot-password', name: 'ForgotPassword', component: ForgotPassword },
   {
     path: '/employee',
     name: 'EmployeeDashboard',
-    component: DashboardEmployee,
-    meta: { requiresAuth: true, role: 'employee' },
+    component: EmployeeDashboard,
+    meta: { requiresAuth: true, roles: ['employee'] },
   },
   {
     path: '/admin',
     name: 'AdminDashboard',
-    component: DashboardAdmin,
-    meta: { requiresAuth: true, role: 'admin' },
+    component: AdminDashboard,
+    meta: { requiresAuth: true, roles: ['admin'] },
+  },
+  {
+    path: '/dashboard',
+    name: 'DashboardRedirect',
+    beforeEnter: () => {
+      const userStore = useUserStore()
+      const role = userStore.user?.role
+      if (role === 'admin') return { path: '/admin' }
+      return { path: '/employee' }
+    },
   },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
 ]
 
+// ... keep the existing guard
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior() {
+    return { top: 0 }
+  },
 })
 
-// Navigation guard: checks authentication and role
-router.beforeEach((to, from, next) => {
-  const store = useUserStore()
+router.beforeEach(async (to) => {
+  const userStore = useUserStore()
 
-  // public routes
-  if (!to.meta.requiresAuth) {
-    return next()
+  if (to.meta.requiresAuth) {
+    if (!userStore.token) {
+      const localToken = localStorage.getItem('token') || sessionStorage.getItem('token')
+      if (localToken) {
+        userStore.setToken(localToken, localStorage.getItem('token') ? 'local' : 'session')
+      } else {
+        return { path: '/login', query: { redirect: to.fullPath } }
+      }
+    }
+
+    if (to.meta.roles && Array.isArray(to.meta.roles)) {
+      if (!userStore.user) {
+        try {
+          await userStore.fetchUserProfile()
+        } catch (_) {}
+      }
+      const role = userStore.user?.role
+      if (!role || !to.meta.roles.includes(role)) {
+        if (role === 'admin') return { path: '/admin' }
+        if (role === 'employee') return { path: '/employee' }
+        return { path: '/login' }
+      }
+    }
   }
-
-  // requires auth
-  if (!store.role) {
-    // not logged in -> send to login, preserve attempted route
-    return next({ name: 'Login', query: { redirect: to.fullPath } })
-  }
-
-  // role protected
-  if (to.meta.role && store.role !== to.meta.role) {
-    // trying to access other role's page -> redirect to user's dashboard
-    return next({ name: store.role === 'admin' ? 'AdminDashboard' : 'EmployeeDashboard' })
-  }
-
-  return next()
 })
 
 export default router

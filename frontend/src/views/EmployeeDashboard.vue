@@ -1,6 +1,5 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid lg:grid-cols-[260px_1fr] gap-6">
-    <!-- Sidebar -->
     <aside class="bg-white border border-gray-200 rounded-xl p-5 h-max">
       <h2 class="text-lg font-semibold mb-4">Employee Menu</h2>
       <nav class="space-y-2">
@@ -10,9 +9,7 @@
       </nav>
     </aside>
 
-    <!-- Content -->
     <section class="space-y-6">
-      <!-- Profile -->
       <div id="profile" class="bg-white border border-gray-200 rounded-xl p-6">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-semibold">Your profile</h2>
@@ -29,7 +26,6 @@
         </div>
       </div>
 
-      <!-- Projects -->
       <div id="projects" class="bg-white border border-gray-200 rounded-xl p-6">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-semibold">My active projects</h2>
@@ -46,11 +42,12 @@
               {{ p.status }}
             </div>
           </div>
-          <div v-if="projects.length === 0" class="text-gray-600">No active projects.</div>
+          <div v-if="projects.length === 0 && !loadingProjects" class="text-gray-600">
+            No active projects.
+          </div>
         </div>
       </div>
 
-      <!-- Messages -->
       <div id="messages" class="bg-white border border-gray-200 rounded-xl p-6">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-semibold">Messages</h2>
@@ -65,7 +62,9 @@
             </div>
             <p class="text-gray-700 text-sm mt-1">{{ m.preview }}</p>
           </li>
-          <li v-if="messages.length === 0" class="py-3 text-gray-600">No messages.</li>
+          <li v-if="messages.length === 0 && !loadingMessages" class="py-3 text-gray-600">
+            No messages.
+          </li>
         </ul>
       </div>
     </section>
@@ -74,8 +73,9 @@
 
 <script setup>
 import { onMounted, ref, computed } from 'vue'
-import axios from 'axios'
 import { useUserStore } from '../stores/userStore'
+import { useProjectsStore } from '../stores/projects'
+import { useMessagesStore } from '../stores/messages'
 import { useRouter } from 'vue-router'
 
 const userStore = useUserStore()
@@ -85,13 +85,15 @@ const user = computed(() => userStore.user)
 const loadingProfile = ref(false)
 const profileError = ref('')
 
-const projects = ref([])
-const loadingProjects = ref(false)
-const projectsError = ref('')
+const projectsStore = useProjectsStore()
+const projects = computed(() => projectsStore.items)
+const loadingProjects = computed(() => projectsStore.loading)
+const projectsError = computed(() => projectsStore.error)
 
-const messages = ref([])
-const loadingMessages = ref(false)
-const messagesError = ref('')
+const messagesStore = useMessagesStore()
+const messages = computed(() => messagesStore.items)
+const loadingMessages = computed(() => messagesStore.loading)
+const messagesError = computed(() => messagesStore.error)
 
 onMounted(async () => {
   if (!userStore.token) {
@@ -106,41 +108,6 @@ onMounted(async () => {
     profileError.value = userStore.error || ''
   }
 
-  await fetchProjects()
-  await fetchMessages()
+  await Promise.all([projectsStore.fetch(), messagesStore.fetch()])
 })
-
-async function fetchProjects() {
-  loadingProjects.value = true
-  projectsError.value = ''
-  try {
-    const url = `${import.meta.env.VITE_API_URL}/projects`
-    const { data } = await axios.get(url, {
-      headers: { Authorization: `Bearer ${userStore.token}` },
-    })
-    projects.value = Array.isArray(data) ? data : data?.projects || []
-  } catch (err) {
-    projectsError.value = err?.response?.data?.message || err.message || 'Failed to load projects'
-    projects.value = []
-  } finally {
-    loadingProjects.value = false
-  }
-}
-
-async function fetchMessages() {
-  loadingMessages.value = true
-  messagesError.value = ''
-  try {
-    const url = `${import.meta.env.VITE_API_URL}/messages`
-    const { data } = await axios.get(url, {
-      headers: { Authorization: `Bearer ${userStore.token}` },
-    })
-    messages.value = Array.isArray(data) ? data : data?.messages || []
-  } catch (err) {
-    messagesError.value = err?.response?.data?.message || err.message || 'Failed to load messages'
-    messages.value = []
-  } finally {
-    loadingMessages.value = false
-  }
-}
 </script>
