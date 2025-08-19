@@ -27,6 +27,8 @@ $routes = [
   '/auth/login' => __DIR__ . '/auth/login.php',
   '/auth/register' => __DIR__ . '/auth/register.php',
   '/auth/logout' => __DIR__ . '/auth/logout.php',
+  '/auth/forgot-password' => __DIR__ . '/auth/forgot-password.php',
+  '/auth/forgot' => __DIR__ . '/auth/forgot-password.php',
 ];
 
 if (isset($routes[$uri])) {
