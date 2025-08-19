@@ -11,11 +11,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
   exit;
 }
 
-// Configuration via environment variables with sensible defaults
-$dbHost = getenv('DB_HOST') ?: '127.0.0.1';
-$dbName = getenv('DB_NAME') ?: 'corpconnect';
-$dbUser = getenv('DB_USER') ?: 'root';
-$dbPass = getenv('DB_PASS') ?: '';
+// Configuration via user-provided db.php (if present), otherwise environment variables with defaults
+$dbHost = '127.0.0.1';
+$dbPort = 3306;
+$dbName = 'corpconnect';
+$dbUser = 'root';
+$dbPass = '';
+if (file_exists(__DIR__ . '/db.php')) {
+  require __DIR__ . '/db.php';
+}
+// Allow env vars to override
+$dbHost = getenv('DB_HOST') ?: $dbHost;
+$dbPort = getenv('DB_PORT') ? (int)getenv('DB_PORT') : $dbPort;
+$dbName = getenv('DB_NAME') ?: $dbName;
+$dbUser = getenv('DB_USER') ?: $dbUser;
+$dbPass = getenv('DB_PASS') ?: $dbPass;
 
 /** @var PDO|null */
 $__dbInstance = null;
@@ -25,7 +35,7 @@ function db(): PDO {
   if ($__dbInstance instanceof PDO) {
     return $__dbInstance;
   }
-  $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8mb4";
+  $dsn = "mysql:host={$dbHost};port={$dbPort};dbname={$dbName};charset=utf8mb4";
   $options = [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -37,7 +47,7 @@ function db(): PDO {
   } catch (Throwable $e) {
     // Attempt to create the database automatically if it does not exist
     try {
-      $dsnNoDb = "mysql:host={$dbHost};charset=utf8mb4";
+      $dsnNoDb = "mysql:host={$dbHost};port={$dbPort};charset=utf8mb4";
       $tmp = new PDO($dsnNoDb, $dbUser, $dbPass, $options);
       $tmp->exec("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
       $__dbInstance = new PDO($dsn, $dbUser, $dbPass, $options);
