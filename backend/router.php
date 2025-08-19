@@ -9,6 +9,17 @@ if ($uri !== '/' && file_exists($filePath) && !is_dir($filePath)) {
   return false; // Let the server handle it (e.g., CSS, images)
 }
 
+// Health/Index for convenience
+if ($uri === '/' || $uri === '/health' || $uri === '/status') {
+  header('Content-Type: application/json');
+  echo json_encode([
+    'name' => 'CorpConnect API',
+    'status' => 'ok',
+    'endpoints' => ['/auth/login','/auth/register','/auth/logout','/me','/employees','/projects','/messages'],
+  ]);
+  exit;
+}
+
 // CORS preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
   header('Access-Control-Allow-Origin: *');
