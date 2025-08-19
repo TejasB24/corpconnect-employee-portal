@@ -155,6 +155,21 @@ function ensure_tables(): void {
     INDEX (user_id),
     CONSTRAINT fk_auth_tokens_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+
+  $pdo->exec('CREATE TABLE IF NOT EXISTS projects (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(190) NOT NULL,
+    budget DECIMAL(12,2) NOT NULL DEFAULT 0,
+    status ENUM("active","planning","completed") NOT NULL DEFAULT "active",
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+
+  $pdo->exec('CREATE TABLE IF NOT EXISTS messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender VARCHAR(120) NOT NULL,
+    preview TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 }
 
 // Initialize tables on every request for MVP safety (cheap if exists)
