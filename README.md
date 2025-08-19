@@ -27,11 +27,10 @@ The **CorpConnect Employee Portal** is a web-based platform designed to streamli
 
 ### Backend
 
-- **Framework**: Node.js with Express.js
-- **Database**: MongoDB (Mongoose for ODM)
-- **Authentication**: JWT (JSON Web Token)
+- **Framework**: PHP
+- **Database**: MySQL
 - **Password Security**: bcrypt.js for hashing
-- **API Testing**: Postman
+- **API Testing**: Curl
 - **Deployment**: Render / Railway (or other Node hosting platform)
 
 ---
