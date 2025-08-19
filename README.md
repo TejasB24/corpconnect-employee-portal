@@ -71,14 +71,12 @@ The **CorpConnect Employee Portal** is a web-based platform designed to streamli
 
 2. **Backend**
 
-   - Initialize Node.js project with Express.
-   - Set up MongoDB connection using Mongoose.
+   - Initialize PHP.
+   - Set up MySQL connection.
    - Create models for:
      - **User** (role-based: admin/employee)
      - **Task**
    - Implement authentication routes (login, register).
-   - Secure APIs with JWT middleware.
-   - Create CRUD routes for tasks and profiles.
    - Integrate backend APIs with frontend.
 
 3. **Integration**
@@ -88,7 +86,7 @@ The **CorpConnect Employee Portal** is a web-based platform designed to streamli
    - Ensure proper error handling and validation.
 
 4. **Testing & Deployment**
-   - Test backend APIs with Postman.
+   - Test backend APIs with curl.
    - Test frontend workflows in browsers.
    - Deploy backend to Render/Railway.
    - Deploy frontend to Netlify/Vercel.
