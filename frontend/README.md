@@ -1,35 +1,49 @@
-# corpconnect-employee-portal
+# CorpConnect Employee Portal – Frontend  
 
-This template should help get you started developing with Vue 3 in Vite.
+## Overview  
+The **CorpConnect Employee Portal** is a web-based platform designed to streamline communication, task management, and administrative operations between employees and management. It features separate login portals for **Admin** and **Employees**, ensuring secure access and role-based functionalities.  
 
-## Recommended IDE Setup
+---  
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Tech Stack  
 
-## Customize configuration
+- **Framework**: Vue.js 3  
+- **Build Tool**: Vite  
+- **Styling**: Tailwind CSS  
+- **State Management**: Pinia  
+- **Routing**: Vue Router  
+- **API Calls**: Axios  
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+---  
 
-## Project Setup
+## Features  
 
-```sh
+- 🔑 User Authentication (Login, Signup, Logout)  
+- 👤 Role-based Access (Admin & Employee)  
+- 📋 Employee Management Dashboard (Add, View, Update, Delete employees)  
+- 🎨 Responsive UI with Tailwind CSS  
+- ⚡ API integration with backend (PHP + MySQL)  
+
+---  
+
+## Setup Instructions  
+
+### Prerequisites  
+- Node.js (v16+)  
+- npm or yarn  
+- Backend (PHP + MySQL) running on local server  
+
+### Installation  
+
+```bash
+# Clone the repository
+git clone https://github.com/TejasB24/corpconnect-employee-portal.git
+
+# Navigate to frontend folder
+cd corpconnect-employee-portal
+
+# Install dependencies
 npm install
-```
 
-### Compile and Hot-Reload for Development
-
-```sh
+# Start development server
 npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
