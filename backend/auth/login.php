@@ -20,11 +20,15 @@ try {
 
   $token = random_token(32);
   $expiresAt = (new DateTime('+1 day'))->format('Y-m-d H:i:s');
-  $insert = $pdo->prepare('INSERT INTO auth_tokens (user_id, token, expires_at) VALUES (:user_id, :token, :expires_at)');
+  $ua = isset($_SERVER['HTTP_USER_AGENT']) ? substr((string)$_SERVER['HTTP_USER_AGENT'], 0, 255) : null;
+  $ip = $_SERVER['REMOTE_ADDR'] ?? null;
+  $insert = $pdo->prepare('INSERT INTO auth_tokens (user_id, token, expires_at, user_agent, ip_address, last_seen) VALUES (:user_id, :token, :expires_at, :user_agent, :ip_address, NOW())');
   $insert->execute([
     ':user_id' => $user['id'],
     ':token' => $token,
     ':expires_at' => $expiresAt,
+    ':user_agent' => $ua,
+    ':ip_address' => $ip,
   ]);
 
   send_json([
@@ -41,4 +45,3 @@ try {
   send_json(['success' => false, 'message' => 'Login failed', 'error' => $e->getMessage()], 500);
 }
 ?>
-

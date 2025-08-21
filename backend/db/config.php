@@ -31,7 +31,7 @@ $dbPass = getenv('DB_PASS') ?: $dbPass;
 $__dbInstance = null;
 
 function db(): PDO {
-  global $__dbInstance, $dbHost, $dbName, $dbUser, $dbPass;
+  global $__dbInstance, $dbHost, $dbPort, $dbName, $dbUser, $dbPass;
   if ($__dbInstance instanceof PDO) {
     return $__dbInstance;
   }
@@ -115,6 +115,10 @@ function require_auth(): array {
   if (!$user) {
     send_json(['success' => false, 'message' => 'Unauthorized'], 401);
   }
+  try {
+    $stmt = db()->prepare('UPDATE auth_tokens SET last_seen = NOW() WHERE token = :token');
+    $stmt->execute([':token' => $token]);
+  } catch (Throwable $e) {}
   return $user;
 }
 
@@ -151,6 +155,9 @@ function ensure_tables(): void {
     user_id INT NOT NULL,
     token VARCHAR(128) NOT NULL UNIQUE,
     expires_at DATETIME NOT NULL,
+    user_agent VARCHAR(255) DEFAULT NULL,
+    ip_address VARCHAR(45) DEFAULT NULL,
+    last_seen DATETIME DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX (user_id),
     CONSTRAINT fk_auth_tokens_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
